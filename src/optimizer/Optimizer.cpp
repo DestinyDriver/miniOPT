@@ -52,6 +52,10 @@ TACProgram Optimizer::optimize(const TACProgram& input) {
                 changed = true;
             }
         }
+
+        if (runControlFlowOptimization(program)) {
+            changed = true;
+        }
     }
 
     return program;
@@ -130,6 +134,68 @@ bool Optimizer::runCommonSubexpressionElimination(TACProgram& program) {
         }
     }
 
+    return changed;
+}
+
+bool Optimizer::runControlFlowOptimization(TACProgram& program) {
+    bool changed = false;
+    auto& instructions = program.getInstructions();
+    std::vector<TACInstruction> result;
+    result.reserve(instructions.size());
+
+    bool unreachable = false;
+
+    for (size_t i = 0; i < instructions.size(); ++i) {
+        auto instr = instructions[i];
+
+        // Labels always restore reachability
+        if (instr.op == OpCode::LABEL) {
+            unreachable = false;
+            result.push_back(instr);
+            continue;
+        }
+
+        // If currently in unreachable code block, drop instruction
+        if (unreachable) {
+            changed = true;
+            continue;
+        }
+
+        // Constant conditional branch simplification
+        if (instr.op == OpCode::JUMP_IF_FALSE) {
+            // if_false 1 goto L -> condition is always true, branch is NEVER taken
+            if (instr.src1 == "1") {
+                changed = true;
+                continue; // eliminate dead branch
+            }
+            // if_false 0 goto L -> condition is always false, branch is ALWAYS taken
+            if (instr.src1 == "0") {
+                instr.op = OpCode::JUMP;
+                instr.dest = instr.dest; // target label is in dest
+                instr.src1 = "";
+                changed = true;
+                // continues to process as JUMP below
+            }
+        }
+
+        // Redundant jump elimination: goto L immediately before L:
+        if (instr.op == OpCode::JUMP) {
+            if (i + 1 < instructions.size() && instructions[i + 1].op == OpCode::LABEL &&
+                instructions[i + 1].dest == instr.dest) {
+                changed = true;
+                continue; // drop redundant jump directly before target label
+            }
+            result.push_back(instr);
+            unreachable = true; // subsequent instructions until next label are unreachable
+            continue;
+        }
+
+        result.push_back(instr);
+    }
+
+    if (changed) {
+        instructions = std::move(result);
+    }
     return changed;
 }
 

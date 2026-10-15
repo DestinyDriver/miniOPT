@@ -24,6 +24,7 @@ public:
     void setOptions(const OptimizerOptions& opts) { options = opts; }
 
     bool runCommonSubexpressionElimination(TACProgram& program);
+    bool runControlFlowOptimization(TACProgram& program);
 
 private:
     OptimizerOptions options;
