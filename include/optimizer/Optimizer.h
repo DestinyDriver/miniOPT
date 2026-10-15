@@ -23,6 +23,8 @@ public:
     const OptimizerOptions& getOptions() const { return options; }
     void setOptions(const OptimizerOptions& opts) { options = opts; }
 
+    bool runCommonSubexpressionElimination(TACProgram& program);
+
 private:
     OptimizerOptions options;
 };
