@@ -27,6 +27,10 @@ enum class OpCode {
 };
 
 std::string opCodeToString(OpCode op);
+
+inline std::ostream& operator<<(std::ostream& os, OpCode op) {
+    return os << opCodeToString(op);
+}
 bool isArithmeticOp(OpCode op);
 bool isComparisonOp(OpCode op);
 bool isCommutativeOp(OpCode op);

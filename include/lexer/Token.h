@@ -48,6 +48,10 @@ enum class TokenType {
 
 std::string tokenTypeToString(TokenType type);
 
+inline std::ostream& operator<<(std::ostream& os, TokenType type) {
+    return os << tokenTypeToString(type);
+}
+
 struct Token {
     TokenType type;
     std::string lexeme;

@@ -1,0 +1,14 @@
+int x = 10;
+int y = 20;
+int dead1 = 999;
+int a = x + y;
+int b = y + x;
+int c = a * 1;
+int d = b + 0;
+int dead2 = dead1 + 1;
+int e = c + d;
+int i = 0;
+while (i < 5) {
+    i = i + 1;
+    e = e + i;
+}

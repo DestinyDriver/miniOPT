@@ -24,6 +24,10 @@ enum class BinaryOp {
 
 std::string binaryOpToString(BinaryOp op);
 
+inline std::ostream& operator<<(std::ostream& os, BinaryOp op) {
+    return os << binaryOpToString(op);
+}
+
 // Base AST Node
 class ASTNode {
 public:
