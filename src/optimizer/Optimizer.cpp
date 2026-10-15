@@ -1,6 +1,8 @@
 #include "optimizer/Optimizer.h"
 #include "optimizer/ConstantFolding.h"
+#include "optimizer/ConstantPropagation.h"
 #include "optimizer/AlgebraicSimplification.h"
+#include "optimizer/DeadCodeElimination.h"
 
 namespace miniopt {
 
@@ -13,7 +15,9 @@ TACProgram Optimizer::optimize(const TACProgram& input) {
     const int MAX_ITERATIONS = 15;
 
     ConstantFolding constFolder;
+    ConstantPropagation constPropagator;
     AlgebraicSimplification algSimplifier;
+    DeadCodeElimination dce;
 
     while (changed && iterations < MAX_ITERATIONS) {
         changed = false;
@@ -25,8 +29,20 @@ TACProgram Optimizer::optimize(const TACProgram& input) {
             }
         }
 
+        if (options.enableConstantPropagation) {
+            if (constPropagator.run(program)) {
+                changed = true;
+            }
+        }
+
         if (options.enableAlgebraicSimplification) {
             if (algSimplifier.run(program)) {
+                changed = true;
+            }
+        }
+
+        if (options.enableDeadCodeElimination) {
+            if (dce.run(program)) {
                 changed = true;
             }
         }
